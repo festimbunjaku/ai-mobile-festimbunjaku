@@ -4,3 +4,36 @@ const { data, error } = await supabase.from('profiles').select('*');
 console.log(data); but it wont run
 
 how to commit in replit
+
+create me a register and login page with flutter using supabase_flutter auth.
+4. Handle errors with SnackBar and navigate to HomePage on success.
+
+the register should have username email and password, and the log in only with email and password, make a beautiful design which is modern and minimalistic based on current design trends and based on best practices
+
+i have done this two scripts for the database in supabase create extension if not exists "uuid-ossp";
+
+create table if not exists public.profiles (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid unique not null,
+  email text unique,
+  full_name text,
+  avatar_url text,
+  created_at timestamp with time zone default timezone('utc', now()),
+  updated_at timestamp with time zone default timezone('utc', now())
+);
+
+create unique index if not exists profiles_user_id_idx on public.profiles(user_id);
+
+alter table public.profiles enable row level security;
+
+-- Allow users to view their own profile
+create policy "Users can view their own profile" 
+  on public.profiles for select 
+  using (auth.uid() = user_id);
+
+-- Allow users to update their own profile
+create policy "Users can update their own profile" 
+  on public.profiles for update 
+  using (auth.uid() = user_id);
+
+what should i add/change in the sql editor
