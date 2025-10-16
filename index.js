@@ -1,32 +1,44 @@
-import { createClient } from '@supabase/supabase-js';
+import { readFileSync } from 'fs';
+import { createServer } from 'http';
+import { extname, join } from 'path';
 
-// Get credentials from environment variables
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Error: SUPABASE_URL and SUPABASE_ANON_KEY environment variables are required');
-  console.log('Please provide your Supabase credentials in the Secrets tab');
-  process.exit(1);
-}
-
-// Create Supabase client
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Query the profiles table
-async function fetchProfiles() {
-  console.log('🔄 Fetching profiles from Supabase...');
+const server = createServer((req, res) => {
+  let filePath = req.url === '/' ? '/index.html' : req.url;
+  let contentType = 'text/html';
   
-  const { data, error } = await supabase.from('profiles').select('*');
-  
-  if (error) {
-    console.error('❌ Error fetching profiles:', error.message);
-    return;
+  const ext = extname(filePath);
+  switch (ext) {
+    case '.js':
+      contentType = 'text/javascript';
+      break;
+    case '.css':
+      contentType = 'text/css';
+      break;
+    case '.json':
+      contentType = 'application/json';
+      break;
+    case '.png':
+      contentType = 'image/png';
+      break;
+    case '.jpg':
+      contentType = 'image/jpg';
+      break;
   }
-  
-  console.log('✅ Successfully fetched profiles:');
-  console.log(data);
-}
 
-// Run the query
-fetchProfiles();
+  try {
+    const content = readFileSync(join(process.cwd(), filePath));
+    res.writeHead(200, { 'Content-Type': contentType });
+    res.end(content);
+  } catch (error) {
+    res.writeHead(404);
+    res.end('File not found');
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`🚀 AI Mobile App running on port ${PORT}`);
+  console.log(`📱 Open your browser and navigate to the URL shown above`);
+  console.log(`🔐 Your beautiful authentication app is ready!`);
+  console.log(`✨ Features: Login, Register, Modern UI, Supabase Auth`);
+});
