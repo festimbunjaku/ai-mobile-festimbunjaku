@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 import '../../services/auth_service.dart';
 import '../home/home_page.dart';
 import 'register_page.dart';
@@ -104,10 +104,10 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 24),
                       Text(
                         'Welcome Back',
-                        style: GoogleFonts.inter(
+                        style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey[900],
+                          color: Colors.grey,
                         ),
                       ),
                       const SizedBox(height: 8),

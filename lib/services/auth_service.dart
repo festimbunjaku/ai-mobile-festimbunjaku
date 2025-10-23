@@ -16,20 +16,44 @@ class AuthService {
         data: {
           'username': username,
         },
+        emailRedirectTo: null, // Disable email redirect
       );
 
+      // If user is created but email is not confirmed, try to confirm it manually
+      if (response.user != null && response.user!.emailConfirmedAt == null) {
+        print('User created but email not confirmed, attempting manual confirmation...');
+        // Try to sign in immediately to trigger confirmation
+        try {
+          await _supabase.auth.signInWithPassword(
+            email: email,
+            password: password,
+          );
+          print('User signed in successfully after registration');
+        } catch (signInError) {
+          print('Could not sign in after registration: $signInError');
+        }
+      }
+
       if (response.user != null) {
-        // Create user profile in the database
-        await _supabase.from('profiles').insert({
-          'user_id': response.user!.id,
-          'email': email,
-          'username': username,
-          'created_at': DateTime.now().toIso8601String(),
-        });
+        print('User registered successfully: ${response.user!.email}');
+        
+        // Try to create user profile manually if trigger doesn't work
+        try {
+          await _supabase.from('users').insert({
+            'id': response.user!.id,
+            'email': email,
+            'username': username,
+          });
+          print('User profile created successfully');
+        } catch (profileError) {
+          print('Warning: Could not create user profile: $profileError');
+          // Don't throw error here, user is still registered
+        }
       }
 
       return response;
     } catch (error) {
+      print('Signup error details: $error');
       throw Exception('Failed to sign up: $error');
     }
   }
@@ -72,5 +96,48 @@ class AuthService {
   // Listen to auth state changes
   static Stream<AuthState> get authStateChanges {
     return _supabase.auth.onAuthStateChange;
+  }
+
+  // Get user profile from users table
+  static Future<Map<String, dynamic>?> getUserProfile() async {
+    try {
+      final user = getCurrentUser();
+      if (user == null) return null;
+
+      final response = await _supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+      return response;
+    } catch (error) {
+      print('Error fetching user profile: $error');
+      return null;
+    }
+  }
+
+  // Update user profile
+  static Future<void> updateUserProfile({
+    String? username,
+    String? fullName,
+    String? avatarUrl,
+  }) async {
+    try {
+      final user = getCurrentUser();
+      if (user == null) throw Exception('User not authenticated');
+
+      final updateData = <String, dynamic>{};
+      if (username != null) updateData['username'] = username;
+      if (fullName != null) updateData['full_name'] = fullName;
+      if (avatarUrl != null) updateData['avatar_url'] = avatarUrl;
+
+      await _supabase
+          .from('users')
+          .update(updateData)
+          .eq('id', user.id);
+    } catch (error) {
+      throw Exception('Failed to update profile: $error');
+    }
   }
 }
