@@ -1,6 +1,6 @@
-# AI Mobile App - Flutter with Supabase Authentication
+# AI Mobile App - Beautiful Authentication with Supabase
 
-A beautiful, modern Flutter application with Supabase authentication featuring login and registration pages with a minimalistic, contemporary design.
+A stunning web-based authentication application with Supabase integration featuring modern login and registration pages with a minimalistic, contemporary design.
 
 ## Features
 
@@ -19,12 +19,22 @@ The app features:
 - **Register Page** - Username, email, and password registration
 - **Home Page** - Welcome dashboard with user information and feature cards
 
-## Setup Instructions
+## 🚀 Quick Start
 
 ### 1. Prerequisites
-- Flutter SDK (3.0.0 or higher)
-- Dart SDK
+- Node.js (14 or higher)
 - A Supabase account and project at [supabase.com](https://supabase.com)
+
+### 2. Local Development Setup
+```bash
+# Install dependencies
+npm install
+
+# Start the development server
+npm start
+
+# Open your browser to http://localhost:3000
+```
 
 ### 2. Supabase Setup
 

@@ -3,7 +3,15 @@ import { createServer } from 'http';
 import { extname, join } from 'path';
 
 const server = createServer((req, res) => {
-  let filePath = req.url === '/' ? '/index.html' : req.url;
+  // Parse URL to remove hash fragments and query parameters
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  let filePath = url.pathname;
+  
+  // Handle root path and hash fragments
+  if (filePath === '/' || filePath.startsWith('/#')) {
+    filePath = '/index.html';
+  }
+  
   let contentType = 'text/html';
   
   const ext = extname(filePath);
@@ -30,15 +38,31 @@ const server = createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': contentType });
     res.end(content);
   } catch (error) {
-    res.writeHead(404);
-    res.end('File not found');
+    // If file not found, serve index.html for SPA routing
+    if (filePath !== '/index.html') {
+      try {
+        const content = readFileSync(join(process.cwd(), '/index.html'));
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(content);
+      } catch (fallbackError) {
+        res.writeHead(404);
+        res.end('File not found');
+      }
+    } else {
+      res.writeHead(404);
+      res.end('File not found');
+    }
   }
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`🚀 AI Mobile App running on port ${PORT}`);
-  console.log(`📱 Open your browser and navigate to the URL shown above`);
-  console.log(`🔐 Your beautiful authentication app is ready!`);
+server.listen(PORT, 'localhost', () => {
+  console.log(`🚀 AI Mobile Authentication App`);
+  console.log(`================================`);
+  console.log(`🌐 Server running at: http://localhost:${PORT}`);
+  console.log(`📱 Open your browser and go to: http://localhost:${PORT}`);
+  console.log(`🔐 Beautiful authentication app ready!`);
   console.log(`✨ Features: Login, Register, Modern UI, Supabase Auth`);
+  console.log(`⚡ Press Ctrl+C to stop the server`);
+  console.log(`================================`);
 });
